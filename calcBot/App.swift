@@ -90,10 +90,27 @@ struct EventHandler: GatewayEventHandler {
         // Get message content
         let content = payload.content.trimmingCharacters(in: .whitespacesAndNewlines)
 
+        // Strip out code blocks (```...```) and inline code (`...`) first so that
+        // example snippets don't accidentally get treated as expressions.
+        let tripleBacktickPattern = #"```[\s\S]*?```"#
+        let inlineBacktickPattern = #"`[^`]*`"#
+
+        let withoutTripleBackticks = content.replacingOccurrences(
+            of: tripleBacktickPattern,
+            with: "",
+            options: .regularExpression
+        )
+
+        let withoutBackticks = withoutTripleBackticks.replacingOccurrences(
+            of: inlineBacktickPattern,
+            with: "",
+            options: .regularExpression
+        )
+
         // Strip out Discord custom emoji tokens like <:name:id> or <a:name:id>
         // so they don't interfere with Soulver parsing.
         let emojiPattern = "<a?:[^>]+>"
-        let expression = content.replacingOccurrences(
+        let expression = withoutBackticks.replacingOccurrences(
             of: emojiPattern,
             with: "",
             options: .regularExpression
@@ -101,6 +118,41 @@ struct EventHandler: GatewayEventHandler {
 
         // Skip empty messages
         guard !expression.isEmpty else {
+            return
+        }
+
+        let trimmedExpression = expression.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Allow \"simple\" math expressions (only numbers, operators, dots, parentheses, and
+        // whitespace) to always pass through, e.g. \"1+1\", \"(2 + 3) * 4\".
+        let simpleMathPattern = #"^[0-9+\-*/%^×÷().\s]+$"#
+        let isSimpleMath = trimmedExpression.range(of: simpleMathPattern, options: .regularExpression) != nil
+
+        if !isSimpleMath {
+            // Require the expression to be \"direct\" (not a full sentence). If the first
+            // non-whitespace character is a letter, treat it as plain text and ignore.
+            if let first = trimmedExpression.first, first.isLetter {
+                return
+            }
+
+            // Additional heuristic to skip long natural-language sentences like
+            // \"30 kirven var +1 kivren eklendi kaç oldu\":
+            // If there are multiple alphabetic words with length >= 4, assume it's
+            // a sentence rather than a compact expression and ignore it.
+            let tokens = trimmedExpression.split(whereSeparator: { $0.isWhitespace })
+            let alphaWords = tokens.filter { token in
+                token.contains { $0.isLetter }
+            }
+            let longAlphaWordsCount = alphaWords.filter { $0.count >= 4 }.count
+            if longAlphaWordsCount >= 2 {
+                return
+            }
+        }
+
+        // If the expression ends with an operator (e.g. \"322-\", \"10+\"), it's
+        // probably an incomplete thought rather than a real calculation, so skip it.
+        if let last = expression.trimmingCharacters(in: .whitespacesAndNewlines).last,
+           "+-*/%^×÷".contains(last) {
             return
         }
 
@@ -122,14 +174,27 @@ struct EventHandler: GatewayEventHandler {
             let hasOperator = expression.range(of: operatorPattern, options: .regularExpression) != nil
 
             if !hasOperator {
-                let numberPattern = #"([-+]?\d*\.?\d+)"#
-                if let matchRange = expression.range(of: numberPattern, options: .regularExpression) {
-                    let numericSubstring = expression[matchRange]
-                    if let exprNumber = Double(numericSubstring),
-                       let resultNumber = Double(resultString),
-                       exprNumber == resultNumber {
-                        return
+                // Heuristic: if the expression contains no operators and the first
+                // numeric value matches the first numeric value in the result, then
+                // it's just echoing the input (e.g. \"1 klavye\", \"31$\"), so skip.
+                let numberPattern = #"[-+]?\d*[\.,]?\d+"#
+
+                func firstNumericValue(in text: String) -> Double? {
+                    guard let range = text.range(of: numberPattern, options: .regularExpression) else {
+                        return nil
                     }
+                    var numeric = String(text[range])
+                    // Normalise comma decimals for Double parsing
+                    if numeric.contains(",") && !numeric.contains(".") {
+                        numeric = numeric.replacingOccurrences(of: ",", with: ".")
+                    }
+                    return Double(numeric)
+                }
+
+                if let exprNumber = firstNumericValue(in: expression),
+                   let resultNumber = firstNumericValue(in: resultString),
+                   exprNumber == resultNumber {
+                    return
                 }
             }
 
