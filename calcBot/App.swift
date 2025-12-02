@@ -90,19 +90,28 @@ struct EventHandler: GatewayEventHandler {
         // Get message content
         let content = payload.content.trimmingCharacters(in: .whitespacesAndNewlines)
 
+        // Strip out Discord custom emoji tokens like <:name:id> or <a:name:id>
+        // so they don't interfere with Soulver parsing.
+        let emojiPattern = "<a?:[^>]+>"
+        let expression = content.replacingOccurrences(
+            of: emojiPattern,
+            with: "",
+            options: .regularExpression
+        ).trimmingCharacters(in: .whitespacesAndNewlines)
+
         // Skip empty messages
-        guard !content.isEmpty else {
+        guard !expression.isEmpty else {
             return
         }
 
         // Try to calculate the expression
         do {
-            let result = calculator.calculate(content)
+            let result = calculator.calculate(expression)
             let resultString = result.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
 
             // Check if calculation was successful and produced a meaningful result
             // Skip if result is empty or same as input (likely means SoulverCore couldn't parse it)
-            guard !resultString.isEmpty && resultString != content else {
+            guard !resultString.isEmpty && resultString != expression else {
                 return
             }
 
