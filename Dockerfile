@@ -37,15 +37,9 @@ RUN swift build -c release
 RUN find .build -name calcBot -type f -executable -exec cp {} /calcBot \;
 
 # Runtime stage
-FROM --platform=linux/amd64 ubuntu:latest
-
-# Install runtime dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    ca-certificates \
-    libcurl4 \
-    libxml2 \
-    && rm -rf /var/lib/apt/lists/*
+# Use the same Swift toolchain image so the Swift runtime shared libraries
+# (e.g. libswiftCore.so) are available at runtime.
+FROM --platform=linux/amd64 swift:6.1.2-noble
 
 WORKDIR /app
 
