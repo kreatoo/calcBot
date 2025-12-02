@@ -17,8 +17,8 @@ struct EntryPoint {
             fatalError("DISCORD_BOT_TOKEN environment variable is not set")
         }
 
-        // Set up calculator with live currency rates
-        let currencyRateProvider = ECBCurrencyRateProvider()
+        // Set up calculator with live currency rates (Raycast backend)
+        let currencyRateProvider = RaycastCurrencyProvider()
         var customization = EngineCustomization.standard
         customization.currencyRateProvider = currencyRateProvider
         
