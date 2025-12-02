@@ -1,8 +1,10 @@
 # Build stage
 # NOTE: This must be built with --platform linux/amd64 because the pre-built
-# SoulverCore module in Vendor/ is compiled for x86_64-unknown-linux-gnu
+# SoulverCore module in Vendor/ is compiled for x86_64-unknown-linux-gnu.
+# We use a base image with a recent glibc (>= 2.38) so it matches the
+# `libSoulverCoreDynamic.so` build requirements.
 # Example: docker build --platform linux/amd64 -t calcbot .
-FROM --platform=linux/amd64 swift:6.1.2-bookworm AS builder
+FROM --platform=linux/amd64 swift:6.1.2-noble AS builder
 
 WORKDIR /build
 
