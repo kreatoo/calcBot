@@ -6,15 +6,26 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1510D2732EDE4A8500835FAB /* SoulverCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1510D2722EDE4A8500835FAB /* SoulverCore */; };
+		1510D2762EDE4C2C00835FAB /* DiscordAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 1510D2752EDE4C2C00835FAB /* DiscordAuth */; };
+		1510D2782EDE4C2C00835FAB /* DiscordBM in Frameworks */ = {isa = PBXBuildFile; productRef = 1510D2772EDE4C2C00835FAB /* DiscordBM */; };
+		1510D27A2EDE4C2C00835FAB /* DiscordCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1510D2792EDE4C2C00835FAB /* DiscordCore */; };
+		1510D27C2EDE4C2C00835FAB /* DiscordGateway in Frameworks */ = {isa = PBXBuildFile; productRef = 1510D27B2EDE4C2C00835FAB /* DiscordGateway */; };
+		1510D27E2EDE4C2C00835FAB /* DiscordHTTP in Frameworks */ = {isa = PBXBuildFile; productRef = 1510D27D2EDE4C2C00835FAB /* DiscordHTTP */; };
+		1510D2802EDE4C2C00835FAB /* DiscordModels in Frameworks */ = {isa = PBXBuildFile; productRef = 1510D27F2EDE4C2C00835FAB /* DiscordModels */; };
+		1510D2822EDE4C2C00835FAB /* DiscordUtilities in Frameworks */ = {isa = PBXBuildFile; productRef = 1510D2812EDE4C2C00835FAB /* DiscordUtilities */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		1510D2652EDE4A6D00835FAB /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			dstPath = "";
+			dstSubfolderSpec = 10;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -35,6 +46,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1510D27A2EDE4C2C00835FAB /* DiscordCore in Frameworks */,
+				1510D2732EDE4A8500835FAB /* SoulverCore in Frameworks */,
+				1510D2762EDE4C2C00835FAB /* DiscordAuth in Frameworks */,
+				1510D27E2EDE4C2C00835FAB /* DiscordHTTP in Frameworks */,
+				1510D2822EDE4C2C00835FAB /* DiscordUtilities in Frameworks */,
+				1510D27C2EDE4C2C00835FAB /* DiscordGateway in Frameworks */,
+				1510D2782EDE4C2C00835FAB /* DiscordBM in Frameworks */,
+				1510D2802EDE4C2C00835FAB /* DiscordModels in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +96,14 @@
 			);
 			name = calcBot;
 			packageProductDependencies = (
+				1510D2722EDE4A8500835FAB /* SoulverCore */,
+				1510D2752EDE4C2C00835FAB /* DiscordAuth */,
+				1510D2772EDE4C2C00835FAB /* DiscordBM */,
+				1510D2792EDE4C2C00835FAB /* DiscordCore */,
+				1510D27B2EDE4C2C00835FAB /* DiscordGateway */,
+				1510D27D2EDE4C2C00835FAB /* DiscordHTTP */,
+				1510D27F2EDE4C2C00835FAB /* DiscordModels */,
+				1510D2812EDE4C2C00835FAB /* DiscordUtilities */,
 			);
 			productName = calcBot;
 			productReference = 1510D2672EDE4A6D00835FAB /* calcBot */;
@@ -106,6 +133,10 @@
 			);
 			mainGroup = 1510D25E2EDE4A6D00835FAB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1510D2712EDE4A8500835FAB /* XCRemoteSwiftPackageReference "SoulverCore" */,
+				1510D2742EDE4C2C00835FAB /* XCRemoteSwiftPackageReference "DiscordBM" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1510D2682EDE4A6D00835FAB /* Products */;
 			projectDirPath = "";
@@ -249,6 +280,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../Frameworks",
+					"@executable_path/../PackageFrameworks",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
@@ -260,6 +298,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../Frameworks",
+					"@executable_path/../PackageFrameworks",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
@@ -289,6 +334,68 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1510D2712EDE4A8500835FAB /* XCRemoteSwiftPackageReference "SoulverCore" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/soulverteam/SoulverCore";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.2.1;
+			};
+		};
+		1510D2742EDE4C2C00835FAB /* XCRemoteSwiftPackageReference "DiscordBM" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/DiscordBM/DiscordBM";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.10.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1510D2722EDE4A8500835FAB /* SoulverCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1510D2712EDE4A8500835FAB /* XCRemoteSwiftPackageReference "SoulverCore" */;
+			productName = SoulverCore;
+		};
+		1510D2752EDE4C2C00835FAB /* DiscordAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1510D2742EDE4C2C00835FAB /* XCRemoteSwiftPackageReference "DiscordBM" */;
+			productName = DiscordAuth;
+		};
+		1510D2772EDE4C2C00835FAB /* DiscordBM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1510D2742EDE4C2C00835FAB /* XCRemoteSwiftPackageReference "DiscordBM" */;
+			productName = DiscordBM;
+		};
+		1510D2792EDE4C2C00835FAB /* DiscordCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1510D2742EDE4C2C00835FAB /* XCRemoteSwiftPackageReference "DiscordBM" */;
+			productName = DiscordCore;
+		};
+		1510D27B2EDE4C2C00835FAB /* DiscordGateway */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1510D2742EDE4C2C00835FAB /* XCRemoteSwiftPackageReference "DiscordBM" */;
+			productName = DiscordGateway;
+		};
+		1510D27D2EDE4C2C00835FAB /* DiscordHTTP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1510D2742EDE4C2C00835FAB /* XCRemoteSwiftPackageReference "DiscordBM" */;
+			productName = DiscordHTTP;
+		};
+		1510D27F2EDE4C2C00835FAB /* DiscordModels */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1510D2742EDE4C2C00835FAB /* XCRemoteSwiftPackageReference "DiscordBM" */;
+			productName = DiscordModels;
+		};
+		1510D2812EDE4C2C00835FAB /* DiscordUtilities */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1510D2742EDE4C2C00835FAB /* XCRemoteSwiftPackageReference "DiscordBM" */;
+			productName = DiscordUtilities;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1510D25F2EDE4A6D00835FAB /* Project object */;
 }
