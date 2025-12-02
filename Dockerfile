@@ -50,6 +50,10 @@ COPY --from=builder /calcBot /app/calcBot
 # The libraries are needed at runtime for the dynamically linked binary
 COPY --from=builder /build/Vendor/SoulverCore-linux /app/Vendor/SoulverCore-linux
 
+# SoulverCore expects its resource bundle at /app/SoulverCore_SoulverCore.resources
+# (see resource_bundle_accessor.swift). Copy the bundle to that location.
+RUN cp -R /app/Vendor/SoulverCore-linux/SoulverCore_SoulverCore.resources /app/SoulverCore_SoulverCore.resources
+
 # Set library path so the binary can find the .so files
 ENV LD_LIBRARY_PATH=/app/Vendor/SoulverCore-linux:${LD_LIBRARY_PATH:-}
 
