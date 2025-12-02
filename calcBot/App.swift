@@ -115,6 +115,24 @@ struct EventHandler: GatewayEventHandler {
                 return
             }
 
+            // If the user entered something like "1 klavye" and Soulver effectively
+            // just returns the same bare number (no operators, same numeric value),
+            // don't reply as it's not a meaningful calculation.
+            let operatorPattern = #"[+\-*/%^×÷]"#
+            let hasOperator = expression.range(of: operatorPattern, options: .regularExpression) != nil
+
+            if !hasOperator {
+                let numberPattern = #"([-+]?\d*\.?\d+)"#
+                if let matchRange = expression.range(of: numberPattern, options: .regularExpression) {
+                    let numericSubstring = expression[matchRange]
+                    if let exprNumber = Double(numericSubstring),
+                       let resultNumber = Double(resultString),
+                       exprNumber == resultNumber {
+                        return
+                    }
+                }
+            }
+
             // Create an embed with the result
             let embed = Embed(
                 title: "Calculation Result",
