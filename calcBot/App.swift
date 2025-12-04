@@ -128,6 +128,16 @@ struct EventHandler: GatewayEventHandler {
         let simpleMathPattern = #"^[0-9+\-*/%^×÷().\s]+$"#
         let isSimpleMath = trimmedExpression.range(of: simpleMathPattern, options: .regularExpression) != nil
 
+        // If it's simple math, check if it's just a bare number (no operators).
+        // Bare numbers like "2077" that just get formatted as "2,077" aren't meaningful calculations.
+        if isSimpleMath {
+            let hasOperator = trimmedExpression.range(of: #"[+\-*/%^×÷]"#, options: .regularExpression) != nil
+            if !hasOperator {
+                // It's just a bare number, skip it
+                return
+            }
+        }
+
         if !isSimpleMath {
             // Require the expression to be \"direct\" (not a full sentence). If the first
             // non-whitespace character is a letter, treat it as plain text and ignore.
