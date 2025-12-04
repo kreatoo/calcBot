@@ -135,16 +135,16 @@ struct EventHandler: GatewayEventHandler {
                 return
             }
 
-            // Additional heuristic to skip long natural-language sentences like
-            // \"30 kirven var +1 kivren eklendi kaç oldu\":
-            // If there are multiple alphabetic words with length >= 4, assume it's
-            // a sentence rather than a compact expression and ignore it.
+            // Additional heuristic to skip natural-language sentences:
+            // - If there are 2+ long alphabetic words (>= 4 chars), it's a sentence
+            // - OR if there are 3+ alphabetic words total (even short ones), it's likely a sentence
+            // Examples: \"30 kirven var +1 kivren eklendi kaç oldu\", \"2018 de yayınladılar mı ki\"
             let tokens = trimmedExpression.split(whereSeparator: { $0.isWhitespace })
             let alphaWords = tokens.filter { token in
                 token.contains { $0.isLetter }
             }
             let longAlphaWordsCount = alphaWords.filter { $0.count >= 4 }.count
-            if longAlphaWordsCount >= 2 {
+            if longAlphaWordsCount >= 2 || alphaWords.count >= 3 {
                 return
             }
         }
