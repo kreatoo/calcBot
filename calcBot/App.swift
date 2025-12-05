@@ -153,6 +153,15 @@ struct EventHandler: GatewayEventHandler {
             let alphaWords = tokens.filter { token in
                 token.contains { $0.isLetter }
             }
+            // If text mixes letters with a bare percent but no real math operators,
+            // treat it as sentence-y (e.g. "100% test") and skip.
+            let mathOperatorPattern = #"[+\-*/×÷^]"#
+            let hasMathOperator = trimmedExpression.range(of: mathOperatorPattern, options: .regularExpression) != nil
+            let hasPercent = trimmedExpression.contains("%")
+            if hasPercent && !hasMathOperator && !alphaWords.isEmpty {
+                return
+            }
+
             let longAlphaWordsCount = alphaWords.filter { $0.count >= 4 }.count
             if longAlphaWordsCount >= 2 || alphaWords.count >= 3 {
                 return
