@@ -122,6 +122,12 @@ struct EventHandler: GatewayEventHandler {
         }
 
         let trimmedExpression = expression.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Recognize simple currency conversion phrases like "1 usd to try" and amounts with thousands/decimal separators
+        let currencyConversionPattern = #"^\s*[-+]?(?:\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,]\d+)?\s+[a-zA-Z]{3}\s+(to|in)\s+[a-zA-Z]{3}\s*$"#
+        let isCurrencyConversion = trimmedExpression.range(
+            of: currencyConversionPattern,
+            options: [.regularExpression, .caseInsensitive]
+        ) != nil
 
         // Allow \"simple\" math expressions (only numbers, operators, dots, parentheses, and
         // whitespace) to always pass through, e.g. \"1+1\", \"(2 + 3) * 4\".
@@ -158,12 +164,12 @@ struct EventHandler: GatewayEventHandler {
             let mathOperatorPattern = #"[+\-*/×÷^]"#
             let hasMathOperator = trimmedExpression.range(of: mathOperatorPattern, options: .regularExpression) != nil
             let hasPercent = trimmedExpression.contains("%")
-            if hasPercent && !hasMathOperator && !alphaWords.isEmpty {
+            if hasPercent && !hasMathOperator && !alphaWords.isEmpty && !isCurrencyConversion {
                 return
             }
 
             let longAlphaWordsCount = alphaWords.filter { $0.count >= 4 }.count
-            if longAlphaWordsCount >= 2 || alphaWords.count >= 3 {
+            if (longAlphaWordsCount >= 2 || alphaWords.count >= 3) && !isCurrencyConversion {
                 return
             }
         }
