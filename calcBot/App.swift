@@ -9,6 +9,30 @@ import Foundation
 import SoulverCore
 import DiscordBM
 
+// Define commands
+enum DiscordCommand: String, CaseIterable {
+    case calculate
+
+    var description: String {
+        switch self {
+        case .calculate:
+            return "Force a calculation (bypassing filters)"
+        }
+    }
+
+    var options: [ApplicationCommand.Option]? {
+        switch self {
+        case .calculate:
+            return [ApplicationCommand.Option(
+                type: .string,
+                name: "expression",
+                description: "The expression to calculate",
+                required: true
+            )]
+        }
+    }
+}
+
 @main
 struct EntryPoint {
     static func main() async throws {
@@ -48,6 +72,24 @@ struct EntryPoint {
             intents: [.guilds, .guildMessages, .messageContent]
         )
 
+        // Register slash commands
+        let commands = DiscordCommand.allCases.map { command in
+            Payloads.ApplicationCommandCreate(
+                name: command.rawValue,
+                description: command.description,
+                options: command.options
+            )
+        }
+        
+        do {
+            try await bot.client
+                .bulkSetApplicationCommands(payload: commands)
+                .guardSuccess()
+            print("Successfully registered commands")
+        } catch {
+            print("Failed to register commands: \(error)")
+        }
+
         // Run bot connection and event handling concurrently
         await withTaskGroup(of: Void.self) { taskGroup in
             // Task: connect the bot
@@ -80,6 +122,57 @@ struct EventHandler: GatewayEventHandler {
     let event: Gateway.Event
     let client: any DiscordClient
     let calculator: Calculator
+
+    func onInteractionCreate(_ interaction: Interaction) async throws {
+        switch interaction.data {
+        case let .applicationCommand(command):
+            switch DiscordCommand(rawValue: command.name) {
+            case .calculate:
+                // Defer response to show we are processing
+                try await client.createInteractionResponse(
+                    id: interaction.id,
+                    token: interaction.token,
+                    payload: .deferredChannelMessageWithSource()
+                ).guardSuccess()
+                
+                guard let expression = command.option(named: "expression")?.value?.asString else {
+                    try await client.updateOriginalInteractionResponse(
+                        token: interaction.token,
+                        payload: Payloads.EditWebhookMessage(
+                            content: "Please provide an expression to calculate."
+                        )
+                    ).guardSuccess()
+                    return
+                }
+                
+                // Calculate
+                let result = calculator.calculate(expression)
+                let resultString = result.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                // Create embed
+                let embed = Embed(
+                    title: "Calculation Result",
+                    description: "```\n\(expression)\n= \(resultString)\n```",
+                    timestamp: Date(),
+                    color: .blue,
+                    footer: .init(text: "SoulverCore")
+                )
+                
+                // Send response
+                try await client.updateOriginalInteractionResponse(
+                    token: interaction.token,
+                    payload: Payloads.EditWebhookMessage(
+                        embeds: [embed]
+                    )
+                ).guardSuccess()
+                
+            case .none:
+                break
+            }
+        default:
+            break
+        }
+    }
 
     func onMessageCreate(_ payload: Gateway.MessageCreate) async throws {
         // Ignore messages from bots to avoid loops
