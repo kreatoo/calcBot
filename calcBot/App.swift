@@ -314,6 +314,57 @@ struct EventHandler: GatewayEventHandler {
                    exprNumber == resultNumber {
                     return
                 }
+                
+                // Check if result is just a decimal-shifted version of an input number
+                // Example: "9294" -> "9.294" (same value, just decimal point moved)
+                func normalizeNumberString(_ str: String) -> String {
+                    // Remove decimal points, commas, and signs to compare digit sequences
+                    return str.replacingOccurrences(of: "[.,+-]", with: "", options: .regularExpression)
+                }
+                
+                func extractAllNumbers(from text: String) -> [String] {
+                    return text.matches(of: try! Regex(numberPattern)).map { String(text[$0.range]) }
+                }
+                
+                let resultNumbers = extractAllNumbers(from: resultString)
+                if let resultNum = resultNumbers.first {
+                    let normalizedResult = normalizeNumberString(resultNum)
+                    let inputNumbers = extractAllNumbers(from: expression)
+                    
+                    // Check if any input number's normalized form matches the result's normalized form
+                    // This catches cases like "9294" -> "9.294" (both normalize to "9294")
+                    for inputNum in inputNumbers {
+                        let normalizedInput = normalizeNumberString(inputNum)
+                        if normalizedInput == normalizedResult {
+                            // Same digits, just different decimal placement - skip response
+                            return
+                        }
+                    }
+                }
+                
+                // Additional heuristic: if the expression has multiple separate numbers
+                // mixed with random letter sequences (not recognized units/currencies),
+                // and Soulver just extracts one of them, skip it.
+                // Examples: "2026 djd 7" -> 7, "6 y 93 j 5272" -> 5272
+                // These are gibberish, not calculations.
+                let numbersInExpression = extractAllNumbers(from: expression)
+                if numbersInExpression.count >= 2 {
+                    // Check if there are random single-letter or short nonsense tokens between numbers
+                    let tokens = expression.split(whereSeparator: { $0.isWhitespace })
+                    let nonNumericTokens = tokens.filter { token in
+                        // Token is non-numeric if it doesn't match a number pattern
+                        String(token).range(of: #"^[-+]?\d*[\.,]?\d+$"#, options: .regularExpression) == nil
+                    }
+                    // If we have short gibberish tokens (1-3 chars) that are just letters,
+                    // this is likely random text, not a calculation
+                    let gibberishTokens = nonNumericTokens.filter { token in
+                        let str = String(token)
+                        return str.count <= 3 && str.allSatisfy { $0.isLetter }
+                    }
+                    if !gibberishTokens.isEmpty && !isCurrencyConversion {
+                        return
+                    }
+                }
             }
 
             // Create an embed with the result
